@@ -158,7 +158,7 @@
     <span class="school-label-count" id="lower-count"></span>
   </div>
 </div>
-<div class="project-list" id="lower-list"></div>
+<div class="project-list" id="lower-list"><div class="empty-state" style="color:var(--text-muted);font-style:italic;">Loading projects...</div></div>
 
 <div class="school-section">
   <div class="school-label">
@@ -167,7 +167,7 @@
     <span class="school-label-count" id="middle-count"></span>
   </div>
 </div>
-<div class="project-list" id="middle-list"></div>
+<div class="project-list" id="middle-list"><div class="empty-state" style="color:var(--text-muted);font-style:italic;">Loading projects...</div></div>
 
 <footer>
   <strong>Saint Andrew's Episcopal School</strong> · Technology Integration<br>
@@ -190,7 +190,7 @@
 </div>
 
 <script>
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqgcUx3KIWEolqpLZ1FZHC39s3yHZrP5eTGwLpIAhIqgelPjWQyaaGuN3NFYk6ckMfAw/exec';
+var APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
 var PROJECTS = [];
 
 function driveUrl(url) {
@@ -222,7 +222,7 @@ function renderList(projects, listId, countId) {
     return;
   }
   list.innerHTML = projects.map(function(p) {
-   var imgTag = p.imageUrl ? '<img src="' + driveUrl(p.imageUrl) + '" alt="' + p.title + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display=\'none\'">' : p.icon;
+    var imgTag = p.imageUrl ? '<img src="' + driveUrl(p.imageUrl) + '" alt="' + p.title + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display=\'none\'">' : p.icon;
     var isteTags = p.iste.flatMap(function(s) { return expandIste(s); }).map(function(c) { return '<span class="std-tag std-iste">' + c + '</span>'; }).join('');
     var cstaTags = p.csta.flatMap(function(s) { return expandCsta(s); }).map(function(c) { return '<span class="std-tag std-csta">' + c + '</span>'; }).join('');
     return '<div class="project-row" style="--row-accent:' + p.accent + '">' +
