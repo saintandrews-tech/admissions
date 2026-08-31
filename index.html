@@ -222,7 +222,7 @@ function renderList(projects, listId, countId) {
     return;
   }
   list.innerHTML = projects.map(function(p) {
-    var imgTag = p.imageUrl ? '<img src="' + driveUrl(p.imageUrl) + '" alt="' + p.title + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display=\'none\'">' : p.icon;
+    var imgTag = p.imageUrl ? '<img src="' + driveUrl(p.imageUrl) + '" alt="' + p.title + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">' : p.icon;
     var isteTags = p.iste.flatMap(function(s) { return expandIste(s); }).map(function(c) { return '<span class="std-tag std-iste">' + c + '</span>'; }).join('');
     var cstaTags = p.csta.flatMap(function(s) { return expandCsta(s); }).map(function(c) { return '<span class="std-tag std-csta">' + c + '</span>'; }).join('');
     return '<div class="project-row" style="--row-accent:' + p.accent + '">' +
