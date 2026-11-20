@@ -189,7 +189,7 @@
 </div>
 
 <script>
-var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqgcUx3KIWEolqpLZ1FZHC39s3yHZrP5eTGwLpIAhIqgelPjWQyaaGuN3NFYk6ckMfAw/exec';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-nm5VIaVbjXJzHvjeH5CG-24BWwi8m_3_IJlJ7fh8DB1tEh5IBfEVgFfbSiRO9KqC/exec';
 var PROJECTS = [];
 
 function driveUrl(url) {
@@ -199,9 +199,17 @@ function driveUrl(url) {
 }
 
 function expandIste(s) {
-  var m = s.match(/\(([^)]+)\)/);
-  if (m) return m[1].split(/,\s*/).map(function(c) { return 'ISTE ' + c.trim(); });
-  return s.replace(/^ISTE\s*/i,'').split(/,\s*/).map(function(c) { return 'ISTE ' + c.trim(); });
+  // Takes one string or a list of fragments and reads every "Strand (1.4a, 1.4b)" group, not just the first.
+  var text = Array.isArray(s) ? s.join(', ') : String(s || '');
+  var codes = [];
+  var re = /\(([^)]+)\)/g, m;
+  while ((m = re.exec(text)) !== null) {
+    m[1].split(/,\s*/).forEach(function(c) { if (c.trim()) codes.push('ISTE ' + c.trim()); });
+  }
+  if (codes.length === 0) {
+    text.replace(/^ISTE\s*/i, '').split(/,\s*/).forEach(function(c) { if (c.trim()) codes.push('ISTE ' + c.trim()); });
+  }
+  return codes.filter(function(c, i) { return codes.indexOf(c) === i; });
 }
 
 function shortCsta(s) {
@@ -222,7 +230,7 @@ function renderList(projects, listId, countId) {
   }
   list.innerHTML = projects.map(function(p) {
     var imgTag = p.imageUrl ? '<img src="' + driveUrl(p.imageUrl) + '" alt="' + p.title + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display=\'none\'">' : p.icon;
-    var isteTags = p.iste.flatMap(function(s) { return expandIste(s); }).map(function(c) { return '<span class="std-tag std-iste">' + c + '</span>'; }).join('');
+    var isteTags = expandIste(p.iste).map(function(c) { return '<span class="std-tag std-iste">' + c + '</span>'; }).join('');
     var cstaTags = p.csta.flatMap(function(s) { return expandCsta(s); }).map(function(c) { return '<span class="std-tag std-csta">' + c + '</span>'; }).join('');
     return '<div class="project-row" style="--row-accent:' + p.accent + '">' +
       '<div class="row-thumb ' + p.bgClass + '" onclick="openModal(' + p.id + ')" title="View project links">' + imgTag + '</div>' +
@@ -236,7 +244,7 @@ function renderList(projects, listId, countId) {
 }
 
 function loadProjects() {
-  fetch(APPS_SCRIPT_URL + '?site=admissions')
+  fetch(APPS_SCRIPT_URL + '?site=admissions&t=' + Date.now())
     .then(function(r) { return r.json(); })
     .then(function(data) {
       PROJECTS = data;
@@ -247,7 +255,9 @@ function loadProjects() {
     })
     .catch(function(err) {
       console.error('Could not load projects:', err);
-      document.getElementById('lower-list').innerHTML = '<div class="empty-state">Could not load projects.</div>';
+      ['lower-list', 'middle-list'].forEach(function(id) {
+        document.getElementById(id).innerHTML = '<div class="empty-state">Could not load projects.</div>';
+      });
     });
 }
 
@@ -276,7 +286,15 @@ function openModal(id) {
           var h = Math.round(window.screen.height * 0.75);
           var left = Math.round((window.screen.width - w) / 2);
           var top = Math.round((window.screen.height - h) / 2);
-          window.open(url, '_blank', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes');
+          var win = null;
+          try {
+            win = window.open(url, '_blank', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes');
+          } catch (err) { win = null; }
+          if (!win) {
+            var t = document.createElement('a');
+            t.href = url; t.target = '_blank'; t.rel = 'noopener noreferrer';
+            document.body.appendChild(t); t.click(); document.body.removeChild(t);
+          }
         });
       })(lnk.url);
       linksEl.appendChild(a);
